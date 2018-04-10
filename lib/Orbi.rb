@@ -38,6 +38,8 @@ class Orbi
 		@host = "#{@opt_args[:protocol]}://#{host}/"
 		@username = username
 		@password = password
+
+		orbiRequest("/index.htm")
 	end
 
 	def getDevices()
@@ -60,7 +62,7 @@ class Orbi
 
 	def logOff()
 		raw_resp = nil
-		raw_resp = orbiRequest("LGO_logout.htm")
+		raw_resp = orbiRequest("LGO_logout.htm" )
 	end
 
 	def listDevices( deviceArr = nil  , args = {} )
@@ -118,7 +120,7 @@ class Orbi
 		end
 	end
 
-	def orbiRequest( path )
+	def orbiRequest( path , auth = true )
 		req = "#{@host}/#{path}?ts=#{Time.now.to_ms}"
 		@log.debug "Requesting: #{req}"
 
@@ -136,7 +138,7 @@ class Orbi
 			uri = URI.parse(req)
 			http = Net::HTTP.new(uri.host, uri.port)
 			request = Net::HTTP::Get.new(uri.request_uri)
-			request.basic_auth( @username , @password )
+			request.basic_auth( @username , @password ) if auth
 
 			response = http.request(request)
 			case response.code

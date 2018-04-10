@@ -98,7 +98,10 @@ config = YAML.load_file( args[:config] )
 log.debug "Loaded configuration file: #{config}"
 
 # Setup orbi class instance with paramters
+log.info "Logging into Orbi..."
 orbi = Orbi.new( config[:orbi_host] , config[:orbi_username] , config[:orbi_password] , { :logger => log } )
+log.info "...login successful."
+
 host_pinger = HostPinger.new( config[:smartthings_ide] , config[:host_pinger_access_token] , config[:host_pinger_app_id]  , { :logger => log } )
 
 # set all rules to unknown status
