@@ -26,7 +26,8 @@ args = {
 	:process => false,
 	:list => false,
 	:sort => "ip",
-	:latest_status => "#{__dir__}/latest_status.yml"
+	:latest_status => "#{__dir__}/latest_status.yml",
+	:multi_login_wait => false
 }
 
 SORTS = [ "ip" , "mac" , "contype" , "model" , "name" ]
@@ -66,6 +67,10 @@ parser = OptionParser.new do|opts|
 		args[:sort] = input
   end
 
+  opts.on( "", "--multi_login_wait"  , "Enable 10 minute wait if a user is already logged into Orbi " ) do
+		args[:multi_login_wait] = true
+  end
+
   opts.on( "-t", "--test"  ,"Enable test/dry run mode.  No 'write' actions will be performed." ) do
 		args[:commit] = false
   end
@@ -83,7 +88,7 @@ end
 
 parser.parse!
 
-log.debug("Inputs: #{$args}")
+log.debug("Inputs: #{args}")
 
 raise "An action is required.  Please supply --list or --process" unless args[:list] || args[:process]
 raise "#{args[:sort]} is not a valid sort option." unless SORTS.include?( args[:sort] )
@@ -99,7 +104,7 @@ log.debug "Loaded configuration file: #{config}"
 
 # Setup orbi class instance with paramters
 log.info "Logging into Orbi..."
-orbi = Orbi.new( config[:orbi_host] , config[:orbi_username] , config[:orbi_password] , { :logger => log } )
+orbi = Orbi.new( config[:orbi_host] , config[:orbi_username] , config[:orbi_password] , { :logger => log  , :multi_login_wait => args[:multi_login_wait] } )
 log.info "...login successful."
 
 host_pinger = HostPinger.new( config[:smartthings_ide] , config[:host_pinger_access_token] , config[:host_pinger_app_id]  , { :logger => log } )

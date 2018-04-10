@@ -30,7 +30,8 @@ class Orbi
 	def initialize( host , username , password , args = {} )
 		@opt_args = {
 						:protocol => "http" ,
-						:logger => :info
+						:logger => :info ,
+						:multi_login_wait => false
 					}.merge(args)
 
 		setupLogger
@@ -144,9 +145,14 @@ class Orbi
 			case response.code
 				when "200"
 					if response.body =~ /multi_login.html/
-						@log.info "Another user is logged in.  Waiting #{MULT_USER_SLEEP} minutes and retrying..."
-						sleep(MULT_USER_SLEEP)
-						tmp_attempts += 1
+						if @opt_args[:multi_login_wait]
+							@log.info "Another user is logged in.  Waiting #{MULT_USER_SLEEP} minutes and retrying..."
+							sleep(MULT_USER_SLEEP)
+							tmp_attempts += 1
+						else
+							@log.info "Another user is logged in.  I will exit quietly."
+							exit 0
+						end
 					else
 						@log.debug "Request for #{path} is a success."
 						@log.debug "Raw response: #{response.body}"
